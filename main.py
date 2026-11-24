@@ -40,11 +40,16 @@ def main() -> int:
     with open(path, "w", encoding="utf-8", newline="\n") as f:
         f.write(ENTRY + "\n")
 
-    # Read-back verification: the file must contain exactly the entry line.
-    with open(path, "r", encoding="utf-8", newline="") as f:
+    # Read-back verification: compare exact bytes, so an encoding or newline
+    # slip can never pass silently.
+    expected = (ENTRY + "\n").encode("utf-8")
+    with open(path, "rb") as f:
         written = f.read()
-    if written != ENTRY + "\n":
-        raise ValueError("read-back mismatch: entry.txt does not match the entry")
+    if written != expected:
+        raise ValueError(
+            f"read-back mismatch: entry.txt is {len(written)} bytes, "
+            f"expected {len(expected)} bytes"
+        )
 
     print(f"Wrote {len(ENTRY)}-char entry to {path}")
     print(ENTRY)
